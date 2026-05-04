@@ -19,6 +19,7 @@ serde = { version = "1", features = ["derive"] }
 serde_json = { version = "1", optional = true }
 tokio = { version = "1", features = ["macros", "sync", "time", "process", "rt"] }
 toml = { version = "1" }
+tower-lsp = "0.20.0"
 tracing = { version = "0.1" }
 tracing-subscriber = { version = "0.3" }
 
