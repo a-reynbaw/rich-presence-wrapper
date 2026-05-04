@@ -2,7 +2,6 @@ use tower_lsp::jsonrpc::Result;
 use tower_lsp::lsp_types::*;
 use tower_lsp::{Client, LanguageServer, LspService, Server};
 use tokio::sync::Mutex;
-// use tokio::io::{AsyncReadExt, AsyncWriteExt};
 
 #[derive(Debug)]
 struct ActiveFile {
@@ -115,7 +114,6 @@ impl LanguageServer for Backend {
             .await;
     }
 
-    // TODO: need to change this a bit, to maybe remove from the map(?)
     async fn did_close(&self, params: DidCloseTextDocumentParams) {
         self.clear_presence(&params.text_document.uri);
             
@@ -127,9 +125,12 @@ impl LanguageServer for Backend {
 
 #[tokio::main]
 async fn main() {
-    let stdin = std::io::stdin();
-    let stdout = std::io::stdout();
+    let stdin = tokio::io::stdin();
+    let stdout = tokio::io::stdout();
 
-    let (service, socket) = LspService::new(|client| Backend {client});
+    let (service, socket) = LspService::new(|client| Backend {
+        client,
+        current_file: Mutex::new(None),
+    });
     Server::new(stdin, stdout, socket).serve(service).await;
 }
