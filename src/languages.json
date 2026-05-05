@@ -1,0 +1,206 @@
+[
+    {
+        "id": "abap",
+        "link": "https://github.com/material-extensions/vscode-material-icon-theme/blob/main/icons/abap.svg"
+    },
+    {
+        "id": "bat",
+        "link": "https://github.com/material-extensions/vscode-material-icon-theme/blob/main/icons/bat.svg"
+    },
+    {
+        "id": "bibtex",
+        "link": "https://github.com/material-extensions/vscode-material-icon-theme/blob/main/icons/bibtex.svg"
+    },
+    {
+        "id": "clojure",
+        "link": "https://github.com/material-extensions/vscode-material-icon-theme/blob/main/icons/clojure.svg"
+    },
+    {
+        "id": "coffeescript",
+        "link": "https://github.com/material-extensions/vscode-material-icon-theme/blob/main/icons/coffeescript.svg"
+    },
+    {
+        "id": "c",
+        "link": "https://github.com/material-extensions/vscode-material-icon-theme/blob/main/icons/c.svg"
+    },
+    {
+        "id": "cpp",
+        "link": "https://github.com/material-extensions/vscode-material-icon-theme/blob/main/icons/cpp.svg"
+    },
+    {
+        "id": "csharp",
+        "link": "https://github.com/material-extensions/vscode-material-icon-theme/blob/main/icons/csharp.svg"
+    },
+    {
+        "id": "css",
+        "link": "https://github.com/material-extensions/vscode-material-icon-theme/blob/main/icons/css.svg"
+    },
+    {
+        "id": "diff",
+        "link": "https://github.com/material-extensions/vscode-material-icon-theme/blob/main/icons/diff.svg"
+    },
+    {
+        "id": "dart",
+        "link": "https://github.com/material-extensions/vscode-material-icon-theme/blob/main/icons/dart.svg"
+    },
+    {
+        "id": "dockerfile",
+        "link": "https://github.com/material-extensions/vscode-material-icon-theme/blob/main/icons/dockerfile.svg"
+    },
+    {
+        "id": "elixir",
+        "link": "https://github.com/material-extensions/vscode-material-icon-theme/blob/main/icons/elixir.svg"
+    },
+    {
+        "id": "erlang",
+        "link": "https://github.com/material-extensions/vscode-material-icon-theme/blob/main/icons/erlang.svg"
+    },
+    {
+        "id": "fsharp",
+        "link": "https://github.com/material-extensions/vscode-material-icon-theme/blob/main/icons/fsharp.svg"
+    },
+    {
+        "id": "go",
+        "link": "https://github.com/material-extensions/vscode-material-icon-theme/blob/main/icons/go.svg"
+    },
+    {
+        "id": "groovy",
+        "link": "https://github.com/material-extensions/vscode-material-icon-theme/blob/main/icons/groovy.svg"
+    },
+    {
+        "id": "handlebars",
+        "link": "https://github.com/material-extensions/vscode-material-icon-theme/blob/main/icons/handlebars.svg"
+    },
+    {
+        "id": "html",
+        "link": "https://github.com/material-extensions/vscode-material-icon-theme/blob/main/icons/html.svg"
+    },
+    {
+        "id": "ini",
+        "link": "https://github.com/material-extensions/vscode-material-icon-theme/blob/main/icons/ini.svg"
+    },
+    {
+        "id": "java",
+        "link": "https://github.com/material-extensions/vscode-material-icon-theme/blob/main/icons/java.svg"
+    },
+    {
+        "id": "javascript",
+        "link": "https://github.com/material-extensions/vscode-material-icon-theme/blob/main/icons/javascript.svg"
+    },
+    {
+        "id": "javascriptreact",
+        "link": "https://github.com/material-extensions/vscode-material-icon-theme/blob/main/icons/javascriptreact.svg"
+    },
+    {
+        "id": "json",
+        "link": "https://github.com/material-extensions/vscode-material-icon-theme/blob/main/icons/json.svg"
+    },
+    {
+        "id": "latex",
+        "link": "https://github.com/material-extensions/vscode-material-icon-theme/blob/main/icons/latex.svg"
+    },
+    {
+        "id": "less",
+        "link": "https://github.com/material-extensions/vscode-material-icon-theme/blob/main/icons/less.svg"
+    },
+    {
+        "id": "lua",
+        "link": "https://github.com/material-extensions/vscode-material-icon-theme/blob/main/icons/lua.svg"
+    },
+    {
+        "id": "makefile",
+        "link": "https://github.com/material-extensions/vscode-material-icon-theme/blob/main/icons/makefile.svg"
+    },
+    {
+        "id": "markdown",
+        "link": "https://github.com/material-extensions/vscode-material-icon-theme/blob/main/icons/markdown.svg"
+    },
+    {
+        "id": "objective-c",
+        "link": "https://github.com/material-extensions/vscode-material-icon-theme/blob/main/icons/objective-c.svg"
+    },
+    {
+        "id": "objective-cpp",
+        "link": "https://github.com/material-extensions/vscode-material-icon-theme/blob/main/icons/objective-cpp.svg"
+    },
+    {
+        "id": "perl",
+        "link": "https://github.com/material-extensions/vscode-material-icon-theme/blob/main/icons/perl.svg"
+    },
+    {
+        "id": "perl6",
+        "link": "https://github.com/material-extensions/vscode-material-icon-theme/blob/main/icons/perl6.svg"
+    },
+    {
+        "id": "php",
+        "link": "https://github.com/material-extensions/vscode-material-icon-theme/blob/main/icons/php.svg"
+    },
+    {
+        "id": "powershell",
+        "link": "https://github.com/material-extensions/vscode-material-icon-theme/blob/main/icons/powershell.svg"
+    },
+    {
+        "id": "jade",
+        "link": "https://github.com/material-extensions/vscode-material-icon-theme/blob/main/icons/jade.svg"
+    },
+    {
+        "id": "python",
+        "link": "https://github.com/material-extensions/vscode-material-icon-theme/blob/main/icons/python.svg"
+    },
+    {
+        "id": "r",
+        "link": "https://github.com/material-extensions/vscode-material-icon-theme/blob/main/icons/r.svg"
+    },
+    {
+        "id": "razor",
+        "link": "https://github.com/material-extensions/vscode-material-icon-theme/blob/main/icons/razor.svg"
+    },
+    {
+        "id": "ruby",
+        "link": "https://github.com/material-extensions/vscode-material-icon-theme/blob/main/icons/ruby.svg"
+    },
+    {
+        "id": "rust",
+        "link": "https://github.com/material-extensions/vscode-material-icon-theme/blob/main/icons/rust.svg"
+    },
+    {
+        "id": "shellscript",
+        "link": "https://github.com/material-extensions/vscode-material-icon-theme/blob/main/icons/shellscript.svg"
+    },
+    {
+        "id": "sql",
+        "link": "https://github.com/material-extensions/vscode-material-icon-theme/blob/main/icons/sql.svg"
+    },
+    {
+        "id": "swift",
+        "link": "https://github.com/material-extensions/vscode-material-icon-theme/blob/main/icons/swift.svg"
+    },
+    {
+        "id": "typescript",
+        "link": "https://github.com/material-extensions/vscode-material-icon-theme/blob/main/icons/typescript.svg"
+    },
+    {
+        "id": "typescriptreact",
+        "link": "https://github.com/material-extensions/vscode-material-icon-theme/blob/main/icons/typescriptreact.svg"
+    },
+    {
+        "id": "tex",
+        "link": "https://github.com/material-extensions/vscode-material-icon-theme/blob/main/icons/tex.svg"
+    },
+    {
+        "id": "vb",
+        "link": "https://github.com/material-extensions/vscode-material-icon-theme/blob/main/icons/vb.svg"
+    },
+    {
+        "id": "xml",
+        "link": "https://github.com/material-extensions/vscode-material-icon-theme/blob/main/icons/xml.svg"
+    },
+    {
+        "id": "xsl",
+        "link": "https://github.com/material-extensions/vscode-material-icon-theme/blob/main/icons/xsl.svg"
+    },
+    {
+        "id": "yaml",
+        "link": "https://github.com/material-extensions/vscode-material-icon-theme/blob/main/icons/yaml.svg"
+    }
+]
