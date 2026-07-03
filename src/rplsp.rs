@@ -7,6 +7,8 @@ use tokio::sync::Mutex;
 struct ActiveFile {
     uri: Url,
     filename: String,
+    // TEMP
+    #[allow(dead_code)]
     language_id: String,
 }
 
@@ -24,7 +26,7 @@ impl Backend {
         if current.as_ref().map(|d| &d.uri) != Some(uri) {
             *current = Some(ActiveFile {
                 uri: uri.clone(),
-                filename: filename.clone().to_string(),
+                filename: filename.to_string(),
                 language_id: lang_id.unwrap_or_else(|| "Plain Text".to_string()),
             });
         }
@@ -51,6 +53,8 @@ impl LanguageServer for Backend {
         Ok(InitializeResult {
             capabilities: ServerCapabilities {
                 hover_provider: Some(HoverProviderCapability::Simple(true)),
+                text_document_sync: Some(TextDocumentSyncCapability::Kind(TextDocumentSyncKind::FULL)),
+
                 ..Default::default()
             },
             ..Default::default()
@@ -115,7 +119,7 @@ impl LanguageServer for Backend {
     }
 
     async fn did_close(&self, params: DidCloseTextDocumentParams) {
-        self.clear_presence(&params.text_document.uri);
+        self.clear_presence(&params.text_document.uri).await;
             
         self.client
             .log_message(MessageType::INFO, format!("cosed file {}", params.text_document.uri))
