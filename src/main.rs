@@ -9,7 +9,7 @@ mod config;
 mod discord;
 mod platform;
 mod util;
-mod lsp;
+mod rplsp;
 
 async fn try_main(config: Config) -> Result<ExitCode> {
     match config.command {
