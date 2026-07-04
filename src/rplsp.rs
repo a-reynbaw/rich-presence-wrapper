@@ -1,59 +1,60 @@
-use tower_lsp::jsonrpc::Result;
+use std::collections::HashMap;
+use std::sync::Mutex;
+
+use eyre::Result;
+use tokio::sync::mpsc;
 use tower_lsp::lsp_types::*;
 use tower_lsp::{Client, LanguageServer, LspService, Server};
-use tokio::sync::Mutex;
 
-#[derive(Debug)]
-struct ActiveFile {
+#[derive(Debug, PartialEq, Eq)]
+struct Message {
     uri: Url,
-    filename: String,
-    // TEMP
-    #[allow(dead_code)]
-    language_id: String,
+    language: String,
 }
 
 #[derive(Debug)]
-struct Backend {
+struct LspTask {
+    tx: mpsc::Sender<Message>,
+    #[expect(unused)]
     client: Client,
-    current_file: Mutex<Option<ActiveFile>>,
+    documents: Mutex<HashMap<Url, DocumentDetails>>,
 }
 
-impl Backend {
-    async fn update_presence(&self, uri: &Url, lang_id: Option<String>) {
-        let mut current = self.current_file.lock().await;
-        let filename = uri.path().split('/').last().unwrap_or("Unknown");
+#[derive(Debug)]
+struct DocumentDetails {
+    language: String,
+}
 
-        if current.as_ref().map(|d| &d.uri) != Some(uri) {
-            *current = Some(ActiveFile {
-                uri: uri.clone(),
-                filename: filename.to_string(),
-                language_id: lang_id.unwrap_or_else(|| "Plain Text".to_string()),
-            });
-        }
+impl LspTask {
+    async fn run(tx: mpsc::Sender<Message>) {
+        let stdin = tokio::io::stdin();
+        let stdout = tokio::io::stdout();
 
-        self.client.log_message(MessageType::INFO, format!("updating {}", filename)).await;
+        let (service, socket) = LspService::new(|client| Self {
+            tx,
+            client,
+            documents: Mutex::new(HashMap::new()),
+        });
+        Server::new(stdin, stdout, socket).serve(service).await;
     }
 
-    async fn clear_presence(&self, uri: &Url) {
-        let mut current = self.current_file.lock().await;
-
-        if let Some(active) = current.as_ref() {
-            if &active.uri == uri {
-                self.client.log_message(MessageType::INFO, format!("cleared file {}", &active.filename)).await;
-                *current = None;
-            }
-        }
+    async fn send_msg(&self, message: Message) {
+        let _ = self.tx.send(message).await;
     }
-        
 }
 
 #[tower_lsp::async_trait]
-impl LanguageServer for Backend {
-    async fn initialize(&self, _: InitializeParams) -> Result<InitializeResult> {
+impl LanguageServer for LspTask {
+    async fn initialize(
+        &self,
+        _: InitializeParams,
+    ) -> tower_lsp::jsonrpc::Result<InitializeResult> {
         Ok(InitializeResult {
             capabilities: ServerCapabilities {
                 hover_provider: Some(HoverProviderCapability::Simple(true)),
-                text_document_sync: Some(TextDocumentSyncCapability::Kind(TextDocumentSyncKind::FULL)),
+                text_document_sync: Some(TextDocumentSyncCapability::Kind(
+                    TextDocumentSyncKind::FULL,
+                )),
 
                 ..Default::default()
             },
@@ -61,80 +62,146 @@ impl LanguageServer for Backend {
         })
     }
 
-    async fn initialized(&self, _: InitializedParams) {
-        self.client
-        .log_message(MessageType::INFO, "server initialized")
-        .await;
-    }
+    async fn initialized(&self, _: InitializedParams) {}
 
-    async fn shutdown(&self) -> Result<()> {
+    async fn shutdown(&self) -> tower_lsp::jsonrpc::Result<()> {
         Ok(())
     }
 
     async fn did_open(&self, params: DidOpenTextDocumentParams) {
-        self.update_presence(
-            &params.text_document.uri,
-            Some(params.text_document.language_id)
-        ).await;
+        {
+            let mut documents = self.documents.lock().expect("what");
+            documents
+                .entry(params.text_document.uri.clone())
+                .insert_entry(DocumentDetails {
+                    language: params.text_document.language_id.clone(),
+                });
+        }
 
-        self.client
-            .log_message(MessageType::INFO, format!("opened file {}", params.text_document.uri))
-            .await;
+        self.send_msg(Message {
+            uri: params.text_document.uri,
+            language: params.text_document.language_id,
+        })
+        .await;
     }
-    
-    async fn hover(&self, params: HoverParams) -> Result<Option<Hover>> {
-        self.update_presence(
-            &params.text_document_position_params.text_document.uri,
-            None,
-        ).await;
 
-        Ok(Some(Hover {
-            contents: HoverContents::Scalar(
-                MarkedString::String("hovering file".to_string())
-            ),
-            range: None
-        }))
+    async fn hover(&self, params: HoverParams) -> tower_lsp::jsonrpc::Result<Option<Hover>> {
+        let r = Ok(Some(Hover {
+            contents: HoverContents::Scalar(MarkedString::String("hovering file".to_string())),
+            range: None,
+        }));
+
+        let message = {
+            let uri = params.text_document_position_params.text_document.uri;
+
+            let documents = self.documents.lock().expect("what");
+            let Some(details) = documents.get(&uri) else {
+                return r;
+            };
+
+            Message {
+                uri,
+                language: details.language.clone(),
+            }
+        };
+
+        self.send_msg(message).await;
+        r
     }
 
     async fn did_change(&self, params: DidChangeTextDocumentParams) {
-        self.update_presence(
-            &params.text_document.uri,
-            None,
-        ).await;
+        let message = {
+            let uri = params.text_document.uri;
+            let documents = self.documents.lock().expect("what");
+            let Some(details) = documents.get(&uri) else {
+                return;
+            };
 
-        self.client
-            .log_message(MessageType::INFO, format!("changed file {}", params.text_document.uri))
-            .await;
+            Message {
+                uri,
+                language: details.language.clone(),
+            }
+        };
+
+        self.send_msg(message).await;
     }
 
     async fn did_save(&self, params: DidSaveTextDocumentParams) {
-        self.update_presence(
-            &params.text_document.uri,
-            None,
-        ).await;
+        let message = {
+            let uri = params.text_document.uri;
+            let documents = self.documents.lock().expect("what");
+            let Some(details) = documents.get(&uri) else {
+                return;
+            };
 
-        self.client
-            .log_message(MessageType::INFO, format!("saved file {}", params.text_document.uri))
-            .await;
+            Message {
+                uri,
+                language: details.language.clone(),
+            }
+        };
+
+        self.send_msg(message).await;
     }
 
     async fn did_close(&self, params: DidCloseTextDocumentParams) {
-        self.clear_presence(&params.text_document.uri).await;
-            
-        self.client
-            .log_message(MessageType::INFO, format!("cosed file {}", params.text_document.uri))
-            .await;
+        let message = {
+            let uri = params.text_document.uri;
+            let mut documents = self.documents.lock().expect("what");
+            let Some(details) = documents.remove(&uri) else {
+                return;
+            };
+
+            Message {
+                uri,
+                language: details.language.clone(),
+            }
+        };
+
+        self.send_msg(message).await;
+    }
+}
+
+struct RpTask {
+    rx: mpsc::Receiver<Message>,
+}
+
+impl RpTask {
+    async fn run(rx: mpsc::Receiver<Message>) -> Result<()> {
+        let mut task = Self { rx };
+        tokio::spawn(async move { task.main().await })
+            .await
+            .expect("cannot join task")
+    }
+
+    async fn main(&mut self) -> Result<()> {
+        let mut last_message = None;
+
+        loop {
+            let Some(new_message) = self.rx.recv().await else {
+                return Ok(());
+            };
+
+            if last_message.as_ref().is_some_and(|x| *x == new_message) {
+                continue;
+            }
+
+            last_message = Some(new_message);
+
+            eprintln!("=> rich-presence: {last_message:#?}");
+        }
     }
 }
 
 #[tokio::main]
 async fn main() {
-    let stdin = tokio::io::stdin();
-    let stdout = tokio::io::stdout();
+    let (tx, rx) = mpsc::channel(25);
 
-    let (service, socket) = LspService::new(|client| Backend {
-        client,
-        current_file: Mutex::new(None),
-    });
-    Server::new(stdin, stdout, socket).serve(service).await;
+    let lsp_task = LspTask::run(tx);
+    let rp_task = RpTask::run(rx);
+
+    let ((), r2) = tokio::join!(lsp_task, rp_task);
+
+    if let Err(e) = r2 {
+        eprintln!("error: {e:#}");
+    }
 }
