@@ -1,4 +1,3 @@
-use std::io;
 use std::path::Path;
 use std::time::{Duration, SystemTime};
 
@@ -67,8 +66,4 @@ impl GenericEditor {
             sleep(self.options.refresh_delay).await;
         }
     }
-}
-
-fn invalid_data<T>(_x: T) -> io::Error {
-    io::Error::from(io::ErrorKind::InvalidData)
 }

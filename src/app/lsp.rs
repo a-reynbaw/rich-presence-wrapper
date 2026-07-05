@@ -65,7 +65,6 @@ struct Document {
 }
 
 impl LspTask {
-    #[instrument(skip(self, state))]
     async fn update_presence(
         &self,
         state: &mut MutexGuard<'_, State>,
@@ -129,6 +128,14 @@ impl LspTask {
             {
                 activity = activity.state(branch);
             }
+
+            let mut assets = Assets::new();
+
+            if let Some(document) = state.documents.get(active_document) {
+                assets = assets.large_image(document.language.clone());
+            }
+
+            activity = activity.assets(assets);
         }
 
         if let Err(e) = state
