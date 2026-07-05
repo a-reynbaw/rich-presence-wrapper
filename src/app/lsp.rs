@@ -78,8 +78,10 @@ impl LspTask {
 impl LanguageServer for LspTask {
     async fn initialize(
         &self,
-        _: InitializeParams,
+        params: InitializeParams,
     ) -> tower_lsp::jsonrpc::Result<InitializeResult> {
+        debug!("initialize(params={params:#?})");
+
         Ok(InitializeResult {
             capabilities: ServerCapabilities {
                 hover_provider: Some(HoverProviderCapability::Simple(true)),
@@ -93,8 +95,8 @@ impl LanguageServer for LspTask {
         })
     }
 
-    async fn initialized(&self, _: InitializedParams) {
-        debug!("initialized");
+    async fn initialized(&self, params: InitializedParams) {
+        debug!("initialized(params={params:#?})");
     }
 
     async fn shutdown(&self) -> tower_lsp::jsonrpc::Result<()> {
@@ -103,7 +105,7 @@ impl LanguageServer for LspTask {
     }
 
     async fn did_open(&self, params: DidOpenTextDocumentParams) {
-        debug!("did_open");
+        debug!("did_open(params={params:#?})");
 
         let mut documents = self.documents.lock().expect("what");
         documents
@@ -119,7 +121,7 @@ impl LanguageServer for LspTask {
     }
 
     async fn hover(&self, params: HoverParams) -> tower_lsp::jsonrpc::Result<Option<Hover>> {
-        debug!("hover");
+        debug!("hover(params={params:#?})");
 
         let uri = params.text_document_position_params.text_document.uri;
 
@@ -138,7 +140,7 @@ impl LanguageServer for LspTask {
     }
 
     async fn did_change(&self, params: DidChangeTextDocumentParams) {
-        debug!("did_change");
+        debug!("did_change(params={params:#?})");
 
         let uri = params.text_document.uri;
         let documents = self.documents.lock().expect("what");
@@ -153,7 +155,7 @@ impl LanguageServer for LspTask {
     }
 
     async fn did_save(&self, params: DidSaveTextDocumentParams) {
-        debug!("did_save");
+        debug!("did_save(params={params:#?})");
 
         let uri = params.text_document.uri;
         let documents = self.documents.lock().expect("what");
@@ -168,7 +170,7 @@ impl LanguageServer for LspTask {
     }
 
     async fn did_close(&self, params: DidCloseTextDocumentParams) {
-        debug!("did_close");
+        debug!("did_close(params={params:#?})");
 
         let uri = params.text_document.uri;
         let mut documents = self.documents.lock().expect("what");
