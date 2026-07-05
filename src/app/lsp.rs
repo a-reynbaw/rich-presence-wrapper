@@ -1,10 +1,16 @@
-use std::{collections::HashMap, process::ExitCode, sync::Mutex};
+use std::collections::HashMap;
+use std::process::ExitCode;
+use std::sync::Mutex;
+use std::time::SystemTime;
 
 use eyre::Result;
 use module::Merge;
 use serde::Deserialize;
 use tokio::sync::watch;
 use tower_lsp::{LanguageServer, LspService, Server, lsp_types::*};
+
+use crate::discord::*;
+use crate::util::SystemTimeExt;
 
 const CLIENT_ID: &str = "1523025249845903410";
 
@@ -26,7 +32,7 @@ pub async fn run() -> Result<ExitCode> {
     let (tx, rx) = watch::channel(None);
 
     let lsp_task = LspTask::run(tx);
-    let rp_task = RpTask::run(rx);
+    let rp_task = RpTask::run(rx, Discord::builder().client_id(CLIENT_ID).finish());
 
     let ((), r) = tokio::join!(lsp_task, rp_task);
 
@@ -93,7 +99,6 @@ impl LanguageServer for LspTask {
 
     async fn shutdown(&self) -> tower_lsp::jsonrpc::Result<()> {
         debug!("shutdown");
-
         Ok(())
     }
 
@@ -180,11 +185,12 @@ impl LanguageServer for LspTask {
 
 struct RpTask {
     rx: watch::Receiver<Option<Message>>,
+    discord: Discord,
 }
 
 impl RpTask {
-    async fn run(rx: watch::Receiver<Option<Message>>) -> Result<()> {
-        let mut task = Self { rx };
+    async fn run(rx: watch::Receiver<Option<Message>>, discord: Discord) -> Result<()> {
+        let mut task = Self { rx, discord };
         tokio::spawn(async move { task.main().await })
             .await
             .expect("cannot join task")
@@ -192,6 +198,7 @@ impl RpTask {
 
     async fn main(&mut self) -> Result<()> {
         let mut last_message = None;
+        let start = SystemTime::now();
 
         loop {
             let _ = self.rx.changed().await;
@@ -199,14 +206,23 @@ impl RpTask {
                 continue;
             };
 
-
             if last_message.as_ref().is_some_and(|x| *x == new_message) {
                 continue;
             }
-
             last_message = Some(new_message);
 
-            info!("{last_message:#?}");
+            trace!("{last_message:#?}"); // TODO: remove me
+
+            let mut activity = Activity::new()
+                .name("todo")
+                .activity_type(ActivityType::Playing)
+                .status_display_type(StatusDisplayType::Name)
+                .timestamps(Timestamps::new().start(start.duration_since_epoch().as_secs() as i64))
+                .party(Party::new().size([1, 1]));
+
+            activity = activity.details("details").state("state");
+
+            self.discord.set_activity(activity).await?;
         }
     }
 }
